@@ -1,117 +1,78 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState, useRef } from 'react';
+import { StyleSheet, View, SafeAreaView, Button, ActivityIndicator, Text } from 'react-native';
+import WebView from 'react-native-webview';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [uri, setUri] = useState('https://app.jobbler.co.uk/');
+  const [env, setEnv] = useState('prod'); 
+  const webViewRef = useRef(null);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const reloadPage = () => {
+    if (webViewRef.current) {
+      webViewRef.current.reload();
+    }
+  };
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const toggleEnv = () => {
+    const newEnv = env === 'prod' ? 'dev' : 'prod';
+    const newUri = newEnv === 'prod'
+      ? 'https://app.jobbler.co.uk/'
+      : 'https://dev.jobbler.co.uk/';
+    setEnv(newEnv);
+    setUri(newUri);
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <Button title="Syenergy" onPress={() => setUri('https://www.whatismybrowser.com/detect/is-javascript-enabled/')} />
+        <Button title="Перезагрузить" onPress={reloadPage} />
+        <Button
+          title={`Switch to ${env === 'prod' ? 'Dev' : 'Prod'}`}
+          onPress={toggleEnv}
+        />
+      </View>
+
+      <View style={styles.envIndicator}>
+        <Text>{env.toUpperCase()}</Text>
+      </View>
+
+      <WebView
+        ref={webViewRef}
+        source={{ uri }}
+        style={styles.webView}
+        userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1"
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        mixedContentMode="always"
+        startInLoadingState={true}
+        renderLoading={() => <ActivityIndicator size="large" color="#0000ff" />}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView error: ', nativeEvent);
+        }}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: '#f0f0f0',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  envIndicator: {
+    alignItems: 'center',
+    marginVertical: 5,
   },
-  highlight: {
-    fontWeight: '700',
+  webView: {
+    flex: 1,
   },
 });
 
